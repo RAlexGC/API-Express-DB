@@ -15,6 +15,8 @@ app.listen(port, () => {
   console.log(`Listening to requests on port ${port}`);
 });
 
+// CRUD Explorers
+
 app.get("/explorers", async (req, res) => {
   const allExplorers = await prisma.explorer.findMany({});
   res.json(allExplorers);
@@ -57,5 +59,54 @@ app.put("/explorers/:id", async (req, res) => {
 app.delete('/explorers/:id', async (req, res) => {
 	const id = parseInt(req.params.id);
 	await prisma.explorer.delete({where: {id: id}});
+	return res.json({message: "Eliminado correctamente"});
+});
+
+// CRUD Mission
+
+app.get("/missions", async (req, res) => {
+  const allMissions = await prisma.mission.findMany({});
+  res.json(allMissions);
+});
+
+app.get("/missions/:id", async (req, res) => {
+  const id = req.params.id;
+  const mission = await prisma.mission.findUnique({
+    where: { id: parseInt(id) },
+  });
+  res.json(mission);
+});
+
+app.post("/missions", async (req, res) => {
+  const mission = {
+    name: req.body.name,
+    lang: req.body.lang,
+    missionCommander: req.body.missionCommander,
+    enrollments: req.body.enrollments,
+    hasCertification: req.body.hasCertification
+  };
+  const message = "Misión creada.";
+  await prisma.mission.create({ data: mission });
+  return res.json({ message });
+});
+
+app.put("/missions/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
+
+  await prisma.mission.update({
+    where: {
+      id: id,
+    },
+    data: {
+      lang: req.body.lang,
+    },
+  });
+
+  return res.json({ message: "Actualizado correctamente" });
+});
+
+app.delete('/missions/:id', async (req, res) => {
+	const id = parseInt(req.params.id);
+	await prisma.mission.delete({where: {id: id}});
 	return res.json({message: "Eliminado correctamente"});
 });
