@@ -7,6 +7,14 @@ const port = process.env.PORT || 3000;
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+// Cors
+const cors = require("cors");
+
+const corsOptions = {
+  origin: "http://localhost:8081"
+};
+app.use(cors(corsOptions));
+
 app.get("/", (req, res) => {
   res.json({ message: "alive" });
 });
@@ -108,5 +116,54 @@ app.put("/missions/:id", async (req, res) => {
 app.delete('/missions/:id', async (req, res) => {
 	const id = parseInt(req.params.id);
 	await prisma.mission.delete({where: {id: id}});
+	return res.json({message: "Eliminado correctamente"});
+});
+
+// CRUD missionCommander
+
+app.get("/mcommander", async (req, res) => {
+  const allMC = await prisma.missionCommander.findMany({});
+  res.json(allMC);
+});
+
+app.get("/mcommander/:id", async (req, res) => {
+  const id = req.params.id;
+  const mc = await prisma.missionCommander.findUnique({
+    where: { id: parseInt(id) },
+  });
+  res.json(mc);
+});
+
+app.post("/mcommander", async (req, res) => {
+  const missionCommander = {
+    name: req.body.name,
+    username: req.body.username,
+    mainStack: req.body.mainStack,
+    currentEnrollment: req.body.currentEnrollment,
+    hasAzureCertification: req.body.hasAzureCertification
+  };
+  const message = "Mission Commander creado";
+  await prisma.missionCommander.create({ data: missionCommander });
+  return res.json({ message });
+});
+
+app.put("/mcommander/:id", async (req, res) => {
+  const id = parseInt(req.params.id);
+
+  await prisma.missionCommander.update({
+    where: {
+      id: id,
+    },
+    data: {
+      mainStack: req.body.mainStack,
+    },
+  });
+
+  return res.json({ message: "Actualizado correctamente" });
+});
+
+app.delete('/mcommander/:id', async (req, res) => {
+	const id = parseInt(req.params.id);
+	await prisma.missionCommander.delete({where: {id: id}});
 	return res.json({message: "Eliminado correctamente"});
 });
